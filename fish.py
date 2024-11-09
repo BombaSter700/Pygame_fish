@@ -9,6 +9,18 @@ def overlap(x,y,w,h,vx,vy,vw,vh):
     vy2=vy+vh
     r = (vx<=x<=vx2 or x<=vx<=x2) and (vy<=y<=vy2 or y<=vy<=y2)
     return r
+def space_wait():
+    wait=True
+    while wait:
+        for event in pygame.event.get(): # проверяем все системные события игры 
+            if event.type == pygame.QUIT:  # если окно закрылось, то...
+                wait = False # сбрасываем флажок в значение ЛОЖЬ для выхода из цикла
+                pygame.quit()   # останавливаем игровой движок
+                sys.exit()  # закрываем окно с экраном игры
+        keys = pygame.key.get_pressed() # запрашиваем состояние клавиатуры
+        if keys[pygame.K_SPACE]: # если в keys зафиксировано нажатие стрелки вправо
+            wait = False # брасываем переменную-флажок в значение ЛОЖЬ для выхода
+
 
 pygame.init() #инизиализация игры
 
@@ -19,12 +31,28 @@ s_high = 600  # высота игрового окна
 screen = pygame.display.set_mode((s_width, s_high))
 pygame.display.set_caption("Аквариум")
 
-# Начало игры
-player_pic = pygame.image.load("Fish05_A.png")  # картинка игрока
-player_x = 15  # начальная координата x
-player_y = 30  # начальная координата y
-player_size = 30  # начальный размер игрока
-player_left = False  # направление движения игрока
+#функция обьявления всех значений
+def game_begin():
+    global player_pic
+    player_pic = pygame.image.load('Fish01_A.png')
+    global player_x
+    player_x = 15 
+    global player_y
+    player_y = 30 
+    global player_size
+    player_size=30     
+    global player_left
+    player_left=False 
+    for i in range(enemy_n):
+        enemy_x[i]=random.randint(0,s_width) # задаем случайную координату x для врага
+        enemy_y[i]=random.randint(0,s_high)  # задаем случайную координату y для врага
+        enemy_tick[i]=random.randint(0,10)   # задаем случайное начальное значение тиков 
+        enemy_speed[i]=random.randint(-3,3)  # задаем случайную скорость врага
+        enemy_size[i]=random.randint(15,60)  # задачем случайный размер врага
+
+restart_pic = pygame.image.load("BtnRestart.png") # подгружаем картинку перезапуска
+start_pic = pygame.image.load("BtnPlay.png") # подгружаем картинку начала
+
 
 enemy_n = 20  # количество врагов
 enemy_pic = pygame.image.load("Fish04_A.png")  # картинка врагов
@@ -67,6 +95,14 @@ for i in range(bubble_n):
     bubble_y[i]= random.randint(s_high, s_high*2)
     bubble_size[i]= random.randint(10,32)
 
+screen.blit(background_pic,(0,0))   # выводим аквариум
+screen.blit(start_pic,(420,250))    # выводим картинку play
+pygame.display.flip()               # обновляем экран
+space_wait()                        # ждем пробел
+life=3                              # задаем количество жизней
+game_begin()                        # инициализируем игрока и врагов
+
+
 '''******************** ОСНОВНОЙ ЦИКЛ ИГРЫ **********************'''
 while running:
     # Обработка событий
@@ -75,6 +111,12 @@ while running:
             running = False
 
     keys = pygame.key.get_pressed()
+
+    # Огранические на передвижение только в рамках экрана
+    if player_x <= 0: player_x = 0 # self.x, self.y - Координаты чекпоинта перса
+    if player_y <= 0: player_y = 0 # В первых 2 условиях говориться, что перс не может выходить за пределы экрана.  
+    if player_x >= s_width - 60: player_x =  - 60 # SCREEN_WIDTH и SCREEN_HEIGHT это константы с размерами окна.
+    if player_y >= s_high - 64:player_y = s_high - 64 # self.x = SCREEN_WIDTH, self.y = SCREEN_HEIGHT
 
     # Управление движением игрока
     if keys[pygame.K_UP]:
@@ -111,12 +153,13 @@ while running:
     # Вывод врагов
     for i in range(enemy_n): 
         # проверяем нет ли столкновениия рыбки врага с рыбкой героем
-        if overlap(player_x, player_y int(player_size * 1.25), player_size, enemy_x[i], enemy_y[i], 
+        if overlap(player_x, player_y, int(player_size * 1.25), player_size, enemy_x[i], enemy_y[i], 
                    int(enemy_size[i]*1.25), enemy_size[i]):
             if player_size>enemy_size[i]:
                 player_size += 2   # увеличиваем размер героя
                 enemy_x[i] = -200  # прячем врага за левую границу экрана
                 enemy_speed[i]=2   # задаем положительную скорость движения
+                
             else:
                 enemy_size[i] +=10 # увеличиваем размер врага
                 player_x = 15      # задаем начальную х-координату героя
