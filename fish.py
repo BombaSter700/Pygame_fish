@@ -1,6 +1,9 @@
 import pygame
 import random
 import sys
+import os
+
+game_pictures = os.path.join(os.path.dirname(__file__), "images")
 
 def overlap(x,y,w,h,vx,vy,vw,vh):
     x2=x+w
@@ -34,7 +37,7 @@ pygame.display.set_caption("Аквариум")
 #функция обьявления всех значений
 def game_begin():
     global player_pic
-    player_pic = pygame.image.load('Fish01_A.png')
+    player_pic =pygame.image.load(os.path.join(game_pictures,'Fish01_A.png'))
     global player_x
     player_x = 15 
     global player_y
@@ -50,13 +53,13 @@ def game_begin():
         enemy_speed[i]=random.randint(-3,3)  # задаем случайную скорость врага
         enemy_size[i]=random.randint(15,60)  # задачем случайный размер врага
 
-restart_pic = pygame.image.load("BtnRestart.png") # подгружаем картинку перезапуска
-start_pic = pygame.image.load("BtnPlay.png") # подгружаем картинку начала
+restart_pic = pygame.image.load(os.path.join(game_pictures,"BtnRestart.png")) # подгружаем картинку перезапуска
+start_pic = pygame.image.load(os.path.join(game_pictures,"BtnPlay.png")) # подгружаем картинку начала
 
 
 enemy_n = 20  # количество врагов
-enemy_pic = pygame.image.load("Fish04_A.png")  # картинка врагов
-enemy_pic2 = pygame.image.load("Fish04_B.png")  # альтернативная картинка врагов
+enemy_pic = pygame.image.load(os.path.join(game_pictures,"Fish04_A.png"))  # картинка врагов
+enemy_pic2 = pygame.image.load(os.path.join(game_pictures,"Fish04_B.png"))  # альтернативная картинка врагов
 
 # Массивы врагов
 enemy_x = [0] * enemy_n
@@ -75,8 +78,8 @@ for i in range(enemy_n):
     enemy_size[i]=random.randint(15,60)  # задачем случайный размер врагов
 
 # Фон
-background_pic = pygame.image.load("Scene_A.png")
-background_pic2 = pygame.image.load("Scene_B.png")
+background_pic = pygame.image.load(os.path.join(game_pictures,"Scene_A.png"))
+background_pic2 = pygame.image.load(os.path.join(game_pictures,"Scene_B.png"))
 b_main = True  # переключатель фона
 b_tick = 50  # счетчик тиков для смены фона
 
@@ -85,7 +88,7 @@ running = True
 
 #инициализция переменные пузырей
 bubble_n = 10 # задаем количество пузырей
-bubble_pic = pygame.image.load("Bubble.png")
+bubble_pic = pygame.image.load(os.path.join(game_pictures,"Bubble.png"))
 bubble_x=[0]*bubble_n
 bubble_y=[0]*bubble_n
 bubble_size=[0]*bubble_n
