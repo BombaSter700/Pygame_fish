@@ -2,8 +2,49 @@ import pygame
 import random
 import sys
 import os
+from assets import load_images
+
+pygame.init() #инизиализация игры
+
+# Параметры окна
+s_width = 1000  # ширина игрового окна
+s_high = 600  # высота игрового окна
+
+screen = pygame.display.set_mode((s_width, s_high))
+pygame.display.set_caption("Аквариум")
 
 game_pictures = os.path.join(os.path.dirname(__file__), "images")
+images = load_images(game_pictures)
+
+#функция обьявления всех значений и загрузки картинок 
+def game_begin():
+    global player_pic, player_x, player_y, player_size, player_left, fish_count
+    global restart_pic, start_pic, count_pic, enemy_pic, enemy_pic2
+    global background_pic, background_pic2, bubble_pic
+
+    # Инициализация игровых данных
+    player_x, player_y = 15, 30
+    player_size = 30
+    player_left = False
+    fish_count = 0
+
+    # Подгруз всех картинок для игры
+    player_pic = images["player"]
+    restart_pic = images["restart"]
+    start_pic = images["start"]
+    count_pic = pygame.transform.scale(images["count"], (40, 40))
+    enemy_pic = images["enemy"]
+    enemy_pic2 = images["enemy_alt"]
+    background_pic = images["background"]
+    background_pic2 = images["background_alt"]
+    bubble_pic = images["bubble"]
+
+    for i in range(enemy_n):
+        enemy_x[i] = random.randint(0, s_width)
+        enemy_y[i] = random.randint(0, s_high)
+        enemy_tick[i] = random.randint(0, 10)
+        enemy_speed[i] = random.randint(-3, 3)
+        enemy_size[i] = random.randint(15, 60)
 
 def overlap(x,y,w,h,vx,vy,vw,vh):
     x2=x+w
@@ -12,6 +53,7 @@ def overlap(x,y,w,h,vx,vy,vw,vh):
     vy2=vy+vh
     r = (vx<=x<=vx2 or x<=vx<=x2) and (vy<=y<=vy2 or y<=vy<=y2)
     return r
+
 def space_wait():
     wait=True
     while wait:
@@ -25,43 +67,8 @@ def space_wait():
             wait = False # брасываем переменную-флажок в значение ЛОЖЬ для выхода
 
 
-pygame.init() #инизиализация игры
-
-# Параметры окна
-s_width = 1000  # ширина игрового окна
-s_high = 600  # высота игрового окна
-
-screen = pygame.display.set_mode((s_width, s_high))
-pygame.display.set_caption("Аквариум")
-
-#функция обьявления всех значений
-def game_begin():
-    global player_pic
-    player_pic =pygame.image.load(os.path.join(game_pictures,'Fish01_A.png'))
-    global player_x
-    player_x = 15 
-    global player_y
-    player_y = 30 
-    global player_size
-    player_size=30     
-    global player_left
-    player_left=False 
-    for i in range(enemy_n):
-        enemy_x[i]=random.randint(0,s_width) # задаем случайную координату x для врага
-        enemy_y[i]=random.randint(0,s_high)  # задаем случайную координату y для врага
-        enemy_tick[i]=random.randint(0,10)   # задаем случайное начальное значение тиков 
-        enemy_speed[i]=random.randint(-3,3)  # задаем случайную скорость врага
-        enemy_size[i]=random.randint(15,60)  # задачем случайный размер врага
-
-restart_pic = pygame.image.load(os.path.join(game_pictures,"BtnRestart.png")) # подгружаем картинку перезапуска
-start_pic = pygame.image.load(os.path.join(game_pictures,"BtnPlay.png")) # подгружаем картинку начала
-
-
-enemy_n = 20  # количество врагов
-enemy_pic = pygame.image.load(os.path.join(game_pictures,"Fish04_A.png"))  # картинка врагов
-enemy_pic2 = pygame.image.load(os.path.join(game_pictures,"Fish04_B.png"))  # альтернативная картинка врагов
-
 # Массивы врагов
+enemy_n = 20  # количество врагов
 enemy_x = [0] * enemy_n
 enemy_y = [0] * enemy_n
 enemy_size = [50] * enemy_n
@@ -69,17 +76,7 @@ enemy_speed = [2] * enemy_n
 enemy_main = [True] * enemy_n
 enemy_tick = [0] * enemy_n
 
-# Инициализация врагов
-for i in range(enemy_n):
-    enemy_x[i] = random.randint(0, s_width)
-    enemy_y[i] = random.randint(0, s_high)
-    enemy_tick[i] = random.randint(0, 10)
-    enemy_speed[i]=random.randint(-3,3)  # задачем случайную скорость врагов
-    enemy_size[i]=random.randint(15,60)  # задачем случайный размер врагов
-
 # Фон
-background_pic = pygame.image.load(os.path.join(game_pictures,"Scene_A.png"))
-background_pic2 = pygame.image.load(os.path.join(game_pictures,"Scene_B.png"))
 b_main = True  # переключатель фона
 b_tick = 50  # счетчик тиков для смены фона
 
@@ -88,7 +85,6 @@ running = True
 
 #инициализция переменные пузырей
 bubble_n = 10 # задаем количество пузырей
-bubble_pic = pygame.image.load(os.path.join(game_pictures,"Bubble.png"))
 bubble_x=[0]*bubble_n
 bubble_y=[0]*bubble_n
 bubble_size=[0]*bubble_n
@@ -98,12 +94,15 @@ for i in range(bubble_n):
     bubble_y[i]= random.randint(s_high, s_high*2)
     bubble_size[i]= random.randint(10,32)
 
+game_begin() # инициализируем игрока и врагов
+pygame.font.init()  # инициализация шрифтов
+myfont = pygame.font.SysFont('Comic Sans MS', 30) # настройка шрифта
 screen.blit(background_pic,(0,0))   # выводим аквариум
 screen.blit(start_pic,(420,250))    # выводим картинку play
 pygame.display.flip()               # обновляем экран
 space_wait()                        # ждем пробел
 life=3                              # задаем количество жизней
-game_begin()                        # инициализируем игрока и врагов
+
 
 
 '''******************** ОСНОВНОЙ ЦИКЛ ИГРЫ **********************'''
@@ -116,10 +115,12 @@ while running:
     keys = pygame.key.get_pressed()
 
     # Огранические на передвижение только в рамках экрана
-    if player_x <= 0: player_x = 0 # self.x, self.y - Координаты чекпоинта перса
-    if player_y <= 0: player_y = 0 # В первых 2 условиях говориться, что перс не может выходить за пределы экрана.  
-    if player_x >= s_width - 60: player_x =  - 60 # SCREEN_WIDTH и SCREEN_HEIGHT это константы с размерами окна.
-    if player_y >= s_high - 64:player_y = s_high - 64 # self.x = SCREEN_WIDTH, self.y = SCREEN_HEIGHT
+    if player_x < 0:player_x = 0
+    if player_y < 0:player_y = 0
+    if player_x > s_width - int(player_size * 1.25):  # Учитываем размер игрока для правой границы
+        player_x = s_width - int(player_size * 1.25)
+    if player_y > s_high - player_size:  # Учитываем высоту игрока для нижней границы
+        player_y = s_high - player_size
 
     # Управление движением игрока
     if keys[pygame.K_UP]:
@@ -152,6 +153,9 @@ while running:
     if player_left:
         player_pic_small = pygame.transform.flip(player_pic_small, True, False)
     screen.blit(player_pic_small, (player_x, player_y))
+    textsurface = myfont.render(str(life), False, (0, 0, 0)) # формируем картинку с цифрой жизней
+    screen.blit(textsurface,(player_x-15,player_y)) # выводим картинку с цифрой жизней
+
 
     # Вывод врагов
     for i in range(enemy_n): 
@@ -162,6 +166,7 @@ while running:
                 player_size += 2   # увеличиваем размер героя
                 enemy_x[i] = -200  # прячем врага за левую границу экрана
                 enemy_speed[i]=2   # задаем положительную скорость движения
+                fish_count += 1
                 
             else:
                 enemy_size[i] +=10 # увеличиваем размер врага
@@ -195,8 +200,13 @@ while running:
         # Отрисовка врага
         screen.blit(enemy_pic_small, (enemy_x[i], enemy_y[i]))
 
+    screen.blit(count_pic,(s_width-60,10)) # выводим картинку съеденной рыбки
+    textsurface = myfont.render(str(fish_count), False, (0, 0, 0)) # формируем картинку с цифрой жизней
+    screen.blit(textsurface,(s_width-80,10)) # выводим картинку с цифрой жизней
+
+
     # Обновление экрана
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(50)
 
 pygame.quit()
